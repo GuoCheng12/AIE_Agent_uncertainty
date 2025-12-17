@@ -24,9 +24,10 @@ CHEMISTRY_SYSTEM_PROMPT = (
 class SemanticEntropyEstimator(BaseUQEstimator):
     """Estimate uncertainty via entropy over canonical SMILES clusters."""
 
-    def __init__(self, n_samples: int = 5, temperature: float = 0.7) -> None:
+    def __init__(self, n_samples: int = 5, temperature: float = 0.7, verbose: bool = True) -> None:
         self.n_samples = n_samples
         self.temperature = temperature
+        self.verbose = verbose
 
     def estimate_uncertainty(self, prompt: str, llm: LLMGenerator) -> float:
         """Generate samples from ``llm`` and compute semantic entropy of the outputs."""
@@ -37,14 +38,24 @@ class SemanticEntropyEstimator(BaseUQEstimator):
 
         canonical_smiles: List[str] = []
         for sample in raw_samples:
-
             extracted = extract_smiles(sample)
             if extracted is None:
                 canonical_smiles.append(_INVALID_LABEL)
+                if self.verbose:
+                    print("-" * 60)
+                    print(f"Raw LLM Response: {sample}")
+                    print("Extracted SMILES: None")
+                    print("Canonical SMILES: INVALID")
                 continue
 
             canonical = canonicalize_smiles(extracted)
             canonical_smiles.append(canonical if canonical is not None else _INVALID_LABEL)
+
+            if self.verbose:
+                print("-" * 60)
+                print(f"Raw LLM Response: {sample}")
+                print(f"Extracted SMILES: {extracted}")
+                print(f"Canonical SMILES: {canonical if canonical is not None else _INVALID_LABEL}")
 
         counts = Counter(canonical_smiles)
         total = sum(counts.values())
