@@ -26,6 +26,7 @@ class SemanticEntropyEstimator(BaseUQEstimator):
 
         canonical_smiles: List[str] = []
         for sample in raw_samples:
+
             extracted = extract_smiles(sample)
             if extracted is None:
                 canonical_smiles.append(_INVALID_LABEL)

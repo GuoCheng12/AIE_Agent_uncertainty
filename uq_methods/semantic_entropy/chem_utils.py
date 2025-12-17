@@ -5,7 +5,11 @@ import re
 from typing import Optional
 
 from rdkit import Chem
-
+from rdkit import RDLogger
+# Disable RDKit error logging (suppress specifically error messages)
+# This will stop the "SMILES Parse Error" from printing to stderr
+lg = RDLogger.logger()
+lg.setLevel(RDLogger.CRITICAL)
 # Matches common SMILES tokens; heuristic and not exhaustive
 _SMILES_PATTERN = re.compile(r"[A-Za-z0-9@+\-\[\]\\/()=#$]{2,}")
 

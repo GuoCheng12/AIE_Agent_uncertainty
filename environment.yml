@@ -1,6 +1,6 @@
 name: aie-uncertainty
-channels:
-  - conda-forge
+# channels:
+#   - conda-forge
 dependencies:
   - python=3.10
   - rdkit
