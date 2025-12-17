@@ -11,6 +11,14 @@ from uq_methods.base_uq import BaseUQEstimator
 from uq_methods.semantic_entropy.chem_utils import canonicalize_smiles, extract_smiles
 
 _INVALID_LABEL = "INVALID"
+CHEMISTRY_SYSTEM_PROMPT = (
+    "You are a specialized Chemistry Assistant Agent.\n"
+    "Your primary task is to generate valid SMILES strings for molecular design tasks.\n"
+    "Output Rules:\n"
+    "1. When asked to generate a molecule, provide ONLY the SMILES string.\n"
+    "2. Do not include markdown formatting, explanations, or chemical names unless explicitly asked.\n"
+    "3. If you must provide context, enclose the SMILES string strictly within <SMILES> and </SMILES> tags."
+)
 
 
 class SemanticEntropyEstimator(BaseUQEstimator):
@@ -22,7 +30,10 @@ class SemanticEntropyEstimator(BaseUQEstimator):
 
     def estimate_uncertainty(self, prompt: str, llm: LLMGenerator) -> float:
         """Generate samples from ``llm`` and compute semantic entropy of the outputs."""
-        raw_samples: List[str] = llm.generate(prompt, self.n_samples, self.temperature)
+        chemistry_aligned_prompt = f"{CHEMISTRY_SYSTEM_PROMPT}\n\nUser request:\n{prompt}"
+        raw_samples: List[str] = llm.generate(
+            chemistry_aligned_prompt, self.n_samples, self.temperature
+        )
 
         canonical_smiles: List[str] = []
         for sample in raw_samples:
